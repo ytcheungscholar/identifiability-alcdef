@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this code or the derived catalogue, please cite the paper and this repository."
+title: "Identifiability diagnostics for ground-based asteroid lightcurves"
+abstract: >-
+  A priori identifiability diagnostics for asteroid rotation periods observed
+  from the ground with nightly photometric zero points: the P vs P/2 flip
+  threshold, the population flip risk, the minimum identifiable amplitude, and
+  a Stage-2 nested test with held-out validation.
+authors:
+  - family-names: Cheung
+    given-names: Yuen Tai
+    affiliation: Independent researcher, Hong Kong SAR
+    orcid: "https://orcid.org/0009-0006-7227-4993"
+version: 1.0.0
+date-released: 2026-11-14
+license: MIT
+repository-code: "https://github.com/ytcheungscholar/identifiability-alcdef"
+keywords:
+  - asteroids
+  - lightcurves
+  - period determination
+  - identifiability
+  - ALCDEF
+  - astronomy
+references:
+  - type: article
+    title: "Two identifiability regimes in ground-based asteroid period determination: nightly zero points, the P to P/2 flip, and an information-collapse limit"
+    authors:
+      - family-names: Cheung
+        given-names: Yuen Tai
+        orcid: "https://orcid.org/0009-0006-7227-4993"
+    journal: Astronomy and Computing
+    year: 2026
+    status: submitted
