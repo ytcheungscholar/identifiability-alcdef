@@ -4,15 +4,17 @@ title: "Identifiability diagnostics for ground-based asteroid lightcurves"
 abstract: >-
   A priori identifiability diagnostics for asteroid rotation periods observed
   from the ground with nightly photometric zero points: the P vs P/2 flip
-  threshold, the population flip risk, the minimum identifiable amplitude, and
-  a Stage-2 nested test with held-out validation.
+  threshold, the minimum identifiable amplitude, the population flip risk, and a
+  nested P vs 2P test with matched controls, held-out validation, a
+  higher-harmonic control and a real-data positive control. Version 1.1.0
+  recomputes every population number on 12,070 cadences and supersedes 1.0.0.
 authors:
   - family-names: Cheung
     given-names: Yuen Tai
     affiliation: Independent researcher, Hong Kong SAR
     orcid: "https://orcid.org/0009-0006-7227-4993"
-version: 1.0.0
-date-released: 2026-11-14
+version: 1.1.0
+date-released: 2026-11-21
 license: MIT
 repository-code: "https://github.com/ytcheungscholar/identifiability-alcdef"
 keywords:

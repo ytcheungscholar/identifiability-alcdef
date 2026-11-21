@@ -4,141 +4,123 @@ Companion code and derived data for
 
 > **Two identifiability regimes in ground-based asteroid period determination:
 > nightly zero points, the *P* → *P*/2 flip, and an information-collapse limit**
-> Y. T. Cheung, submitted to *Astronomy and Computing*.
+> Y. T. Cheung, *Astronomy and Computing* (submitted 21 November 2026).
+> Preprint DOI: `10.5281/zenodo.XXXXXXX`
 
-The package answers, *before any period search is run*, how much of a
-rotation period a ground-based lightcurve can support. It is based on one
-observation: with an unknown photometric zero point on every night, the
-statistically correct estimator is equivalent to subtracting each night's
-mean (Frisch–Waugh–Lovell), and that operation is a high-pass filter on the
-lightcurve harmonics. The consequences are analytic and depend on the
+The package answers, *before any period search is run*, how much of a rotation
+period a ground-based lightcurve can support. It rests on one observation: with
+an unknown photometric zero point on every night, the statistically correct
+estimator is equivalent to subtracting each night's mean
+(Frisch–Waugh–Lovell), and that operation is a high-pass filter on the harmonic
+content of the lightcurve. The consequences are analytic and depend on the
 timestamps, not on the fitting algorithm.
 
-## Quickstart
+**Version 1.1.0** (21 November 2026). Supersedes v1.0.0 (14 November 2026);
+every population number changed in v1.1, so v1.0 tables must not be mixed with
+these.
+
+## Headline numbers
+
+| quantity | value | source |
+|---|---|---|
+| cadences audited a priori | 12,070 (9,958 asteroids) | `data/v1.1/out_a1exact_20261119.csv` |
+| physical sample before guards | 8,906 | `data/v1.1/out_full_lcdb_20261119.csv` |
+| campaigns in the nested test | 6,657 | `data/v1.1/out_lono_v5_c34.csv` |
+| in-sample rejection rate | 58.1 % | `reproduce_3f4f_control.py` |
+| held-out improvement, subharmonic | 9.3 % | same |
+| held-out improvement, quartic | 9.2 % | same |
+| held-out improvement, slow modulation | 22.5 % | same |
+| held-out improvement, higher harmonics {3f₀,4f₀} | **46.7 %** | same |
+| three-condition screen, archive | 4.99 % (332/6,657) | same |
+| four-condition screen, archive | **3.35 %** (223/6,657) | same |
+| four-condition, archive, frequency re-fitted per fold | **3.00 %** (200/6,654) | `reproduce_closure.py` |
+| four-condition nulls (strict / drift / stationary / amp-mod) | 1.9 / 0.8 / 1.1 / 1.4 % | `analyse_closure.py` |
+| positive control $U=3$, three conditions | 55.5 % (1,264/2,277) | `reproduce_u3_control.py` |
+| positive control $U=3$, four conditions | **53.4 %** (1,216/2,277) | `reproduce_closure.py` |
+| fourth condition, in-sample rate | 59.2 % (3,942/6,656) | `reproduce_table6_harmonic.py` |
+| seventh null arm: strict H₀ + drift, four conditions | 1.9 / 2.0 % (A₁ = 0.05 / 0.10) | `reproduce_table7_seventh_arm.py` |
+
+The four-condition screen keeps 53.4 % of a known doubling while the archive
+falls to 3.35 %: a 15.9× separation under one screen, one fold structure and one
+exact per-campaign critical value. 3.35 % is above every cluster-bootstrap
+interval of the four-condition nulls (highest upper bound 2.7 %); whether that
+excess is astrophysical or a correlated-noise effect that the generator does not
+reproduce is left open in the paper.
+
+## Repository layout
+
+```
+code/     reproducing scripts (each one writes the CSV its table/figure needs)
+data/v1.1 derived tables needed by code/ (no archive download required)
+figs/     figures as shipped
+data/     v1.0 tables, kept only for provenance -- superseded, do not use
+```
+
+## What regenerates what
+
+| artefact | script | input | output |
+|---|---|---|---|
+| Table 2 (M=2 vs M=4, interaction grid) | `code/reproduce_table2.py` | synthetic cadences | `data/v1.1/out_table2_n200.csv` |
+| Table 6 / Fig. 3a (held-out decomposition, four controls) | `code/reproduce_3f4f_control.py` | ALCDEF campaigns | `out_lono_v5_c34.csv` |
+| Table 7 (six-arm calibration) | `code/reproduce_table7.py` | 200 real cadences | `calib_v5b_a05.npz`, `calib_v5b_a10.npz` |
+| Table 7 bootstrap intervals | `code/analyse_closure.py` | the two npz files | printed intervals |
+| Table 8 / Fig. 4 (calibration-prior kernel) | `code/reproduce_table8.py`, `code/fig4.py` | all 12,070 cadences | `out_table8_full_20261121.csv` |
+| §4.2.2 frequency-refit pass | `code/reproduce_freqopt.py` | campaigns | `out_lono_v5_freqopt.csv` |
+| four conditions at the re-fitted frequency | `code/reproduce_closure.py freqopt` | the above | `out_freqopt_c34.csv` |
+| §4.2.4 positive control | `code/reproduce_u3_control.py` | $U=3$ campaigns | `out_u3_control_20261121.csv` |
+| positive control, four conditions | `code/reproduce_closure.py u3` | the above | `out_u3_c34.csv` |
+| Figs. 2–4 | `code/fig2.py`, `code/fig3.py`, `code/fig4.py` | shipped tables | `figs/*.png` |
+
+Fig. 1 (a, b) is assembled from `data/v1.1/out_a1exact_20261119.csv` and
+`data/v1.1/out_insample_v5.csv`; it is shipped as a PNG and is not regenerated
+by a single script.
+
+## Running
+
+Every script sets two absolute paths at the top:
 
 ```python
-import numpy as np
-from lightcurve_identifiability import blind_metrics, stage2_test, assign_nights
-
-# t in hours, mag in magnitudes, sigma the per-point uncertainty
-night_id = assign_nights(t)                    # groups into nights (7.2 h gap)
-m = blind_metrics(t, night_id, sigma=0.05, period_h=16.49, amplitude_a1=0.06)
-# -> r0_star, r_star, eta_f0, f0L, A1_min, lambda_odd, can_resolve
-
-s = stage2_test(t, mag, night_id, period_h=16.49)
-# -> F_odd, F_crit, heldout_drss_half / _poly / _gamma, verdict
+H    = r"...\ac_repo_plan"     # where the derived CSVs live
+ROOT = r"...\alcdef_data"      # the unpacked ALCDEF files
 ```
 
-`blind_metrics` returns
+Point both at your checkout (`H` → `data/v1.1`, `ROOT` → the ALCDEF dump) and
+run, e.g. `python code/reproduce_table8.py`. Requirements: Python ≥ 3.10,
+`numpy`, `scipy`, `pandas`, `matplotlib`. The archive itself is public: ALCDEF
+(Warner 2011) and the LCDB (Warner et al. 2009).
 
-| key | meaning |
-|---|---|
-| `r0_star` | geometric flip threshold on $A_4/A_1$; if the object's $A_4/A_1$ exceeds it, an $M=2$ fit locks onto $P/2$ |
-| `r_star` | same, including the third-harmonic correction |
-| `eta_f0` | fraction of fundamental variance that survives the nightly projection |
-| `f0L` | nightly phase coverage in cycles per night |
-| `A1_min` | smallest fundamental amplitude for which the odd-harmonic test reaches 80 % power |
-| `lambda_odd` | non-centrality of that test for the amplitude you pass in |
-| `can_resolve` | `A1 >= A1_min` |
+Runtime: Table 8 over 12,070 cadences takes minutes; the calibration arms
+(six arms of the table plus the seventh drift null, each 200 cadences ×
+8 realisations) take about half an hour per reference amplitude; the per-fold
+frequency-refit pass takes about a quarter of an hour on a desktop CPU.
 
-`stage2_test` returns a nested $F$-test of $P_\mathrm{cat}$ versus
-$2P_\mathrm{cat}$ **plus the two controls the paper shows are necessary**:
+## Two conventions that matter
 
-* `heldout_drss_poly` — a quartic polynomial with the same four extra
-  parameters (generic flexibility),
-* `heldout_drss_gamma` — a multiplicative amplitude slope, the physical form
-  of seasonal phase-angle evolution,
-* `verdict` — `half-period candidate` only when the half-integer terms
-  improve the held-out nights *and* beat both alternatives.
+* **Exact critical values.** Every screen uses $F_{\rm crit}(4,\nu)$ with the
+  campaign's own $\nu = N-8-K$, never a fixed 2.43. Using the fixed value
+  shifts the archive rate from 4.99 % to 5.03 % and the four-condition count
+  from 223 to 225 — small, but it is the difference between a reproducible and
+  an approximate number.
+* **Paired noise across arms.** In the calibration, the noise realisation and
+  the harmonic phases are drawn once per campaign and shared by all arms, so
+  adding an arm cannot move the numbers of the others. The six arms must be run
+  together; running them separately breaks the pairing.
 
-Run `python lightcurve_identifiability.py` for a two-case demonstration
-(one well-covered campaign that is flagged, one short-night campaign that is
-correctly reported as not evaluable).
+## Caveats the data will not let you forget
 
-## What is in this repository
-
-```
-lightcurve_identifiability.py      core module (~300 lines, numpy only)
-test_smoke.py                      13 synthetic checks, run with python test_smoke.py
-reproduce_figures.py               rebuilds Figs. 1-4 from the tables below
-data/alcdef_identifiability_catalog.csv   6,164 campaigns, 4,172 asteroids
-data/stage2_holdout_results.csv           562 evaluable campaigns, in-sample and held-out statistics
-data/validation_28_campaigns.csv          28 real cadences, predicted vs injection-recovery r*
-data/ridge_sigma_zp.csv                   softened threshold vs zero-point prior width
-figs/                              output of reproduce_figures.py
-```
-
-`reproduce_figures.py` reproduces every figure with no archive access:
-```
-fig1: n=28  r=0.993  rms=0.026
-fig2: n=1813 campaigns, danger 19.0%, flip 19.1%
-fig3: in-sample 87.5%, held-out half 16.2%, poly 12.5%, gamma 29.7%
-fig4: 6 curves
-```
-
-## Tests
-
-```
-python test_smoke.py        # 13 tests, < 1 s
-```
-
-The suite includes explicit regression guards on the layout of the Stage-2
-design blocks (the half-integer columns must sit at $f_0/2$ and $3f_0/2$;
-the amplitude-slope control must use the even harmonics). Two column-index
-mistakes of exactly that kind were caught this way during development, and
-either would have left `F_odd` looking plausible while destroying the
-meaning of the test.
-
-## The derived catalogue
-
-`data/alcdef_identifiability_catalog.csv` is built in one pass over the
-24,643 files of the ALCDEF archive matched to the LCDB period catalogue:
-apparitions split at 90-day gaps, then physical cuts (≥30 measurements,
-≥3 nights with ≥3 points, median night length 1–10 h, span ≤400 d).
-**No amplitude cut is applied in the table** — the amplitude gate is applied
-at analysis time, because the population fraction depends on it
-(19.0 % for the full sample rising to 31.1 % when a strong second harmonic
-is required). Columns:
-
-`num, name, file, app, jd0, span_d, nights, npt, L, P, f0L, A1..A4, sig,
-A1sig, A2sig, r4, rstar, d2, d4, U, amp_lcdb`
-
-with `r4 = A4/A1`, `rstar` the flip threshold, `d2`/`d4` the M=2/M=4
-residual differences at $f_0$ and $2f_0$, and `U` the LCDB quality code.
-
-## Caveats worth knowing before you use it
-
-1. **Never test at a period commensurate with the 24 h sampling cycle.**
-   With $P = 8$ h exactly, the night-to-night phase pattern is periodic and
-   the held-out halves become degenerate. The paper's synthetic work uses
-   incommensurate periods for this reason, and the demonstration does too.
-2. **The held-out test needs six nights.** With fewer, or with alternating
-   nights that do not constrain the eight-parameter base, the verdict is
-   `not evaluable`; in the archive that happens for 45 % of campaigns, which
-   is itself a measurement of the identifiability limit.
-3. **`R_prior` needs a population.** Pass `population_r4` (the `r4` column of
-   the catalogue) to get a flip probability; without it the value is omitted.
-4. **The threshold assumes one zero point per night.** Per-observer offsets,
-   or nights split across two telescopes, must be passed as separate nights.
-
-## Requirements
-
-Python ≥ 3.9, `numpy`; `scipy` only for `stage2_test` (F-distribution
-quantiles); `matplotlib` only for `reproduce_figures.py`.
-
-## Data sources
-
-* ALCDEF — Warner (2021), NASA PDS, doi:10.26033/b8cw-s522
-* LCDB — Warner, Harris & Pravec (2009), Icarus 202, 134
-
-## License
-
-MIT — see `LICENSE`.
+* The lowest coverage bin ($f_0L<0.05$) is a $0/0$ degeneracy: $r_0^*$ is large
+  there for the wrong reason, and the recovery fraction is not a recovery
+  measurement. Only the $U\ge3$, $\le30$ d subset gives a clean floor.
+* The synthetic nulls carry white noise and harmonics up to the fourth only.
+  They contain no within-night correlated noise, no non-Gaussian outliers and
+  no $m\ge5$ content; the paper states the resulting excess as a signal whose
+  origin is not yet established, not as a prevalence measurement.
 
 ## Citation
 
-See `CITATION.cff`. Please cite both the paper and this repository (Zenodo
-DOI to be inserted on publication).
+See `CITATION.cff`. If you use the derived catalogue or the diagnostics, please
+cite both the paper and this repository.
 
-* Repository: <https://github.com/ytcheungscholar/identifiability-alcdef>
-* Author ORCID: [0009-0006-7227-4993](https://orcid.org/0009-0006-7227-4993)
+## Licence
+
+MIT (see `LICENSE`).

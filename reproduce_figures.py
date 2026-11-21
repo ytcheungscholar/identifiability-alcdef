@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Reproduce Figs. 1-4 of the paper from the shipped derived tables.
 
@@ -59,7 +59,7 @@ x = np.linspace(0.01, 3.0, 500)
 eta = 1 - (np.sin(np.pi * x) / (np.pi * x)) ** 2
 ax[0].plot(x, eta, "k-", lw=1.3, label=r"$\eta(f)=1-\mathrm{sinc}^2(\pi fL)$")
 mf = 4.0 / np.array([5.3, 7.3, 9.7, 13.3])
-mk = np.array([0.881, 0.659, 0.381, 0.263])
+mk = np.array([0.910, 0.675, 0.441, 0.269])
 ax[0].plot(mf, mk, "o", ms=5.5, mfc="none", mew=1.3, color="#C44E52",
            label="measured (6 nights x 4 h)")
 ax[0].set_xlabel(r"$f\,L$   (cycles per night)")
@@ -136,7 +136,7 @@ ax2[0].set_ylim(0, 50)
 # prior-risk calibration: r0* must come from the module; recompute from the
 # catalog's r* (r* ~ r0* to within 0.01) so this script needs no archive.
 pr, ob = [], []
-for t0 in (0.20, 0.25, 0.30, 0.35, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90):
+for t0 in (0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90):
     pr.append(100 * float(np.mean(r4 > t0)))
     m = (rs >= t0 - 0.025) & (rs < t0 + 0.025)
     if m.sum() >= 15:
@@ -239,3 +239,6 @@ fig4.savefig(os.path.join(OUT, "fig4_ridge.png"), dpi=200)
 print("fig4: %d curves" % len(curves))
 
 print("\nfigures written to", OUT)
+
+
+
