@@ -9,14 +9,15 @@
 (b) r0* median with its 10-90 band, both designs.
 lambda_crit is the exact per-campaign value (noncentral F, 80% power).
 """
+import os
 import numpy as np
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
-OUT = r"C:\Users\jacky\.openclaw\workspace\v2_manuscript\figures\fig2.png"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(H, "fig2.png")
 
 plt.rcParams.update({"font.size": 9, "axes.titlesize": 9.5, "axes.labelsize": 9,
                      "legend.fontsize": 6.9, "xtick.labelsize": 8, "ytick.labelsize": 8})

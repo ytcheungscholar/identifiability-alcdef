@@ -18,6 +18,7 @@ interpretation of the test, so the layout of the design blocks is asserted
 explicitly below rather than only through the final verdict.
 """
 
+import os
 import math
 import unittest
 

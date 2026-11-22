@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import f as fdist
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
 DEN = 6657.0          # denominator used in the paper (guarded campaigns)
 
 

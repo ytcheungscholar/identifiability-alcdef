@@ -1,34 +1,43 @@
 # -*- coding: utf-8 -*-
-"""v5 §4.2: four-arm calibration with the unified 4 -> 8 screen and the
-absorption control 8 -> 12, on real cadences, with FIXED physical amplitudes.
+"""Table 7: seven-arm calibration of the 4 -> 8 screen on 200 real cadences.
 
-Injection (identical physical ruler everywhere in v5):
-    A1 = 0.05 or 0.10 mag,  A2 = 0.25,  A3 = 0.03,  A4 = 0.08
+Injection (the same physical ruler for every arm):
+    A1 = 0.05 or 0.10 mag;  A2 = 5 A1,  A3 = 0.6 A1,  A4 = 1.6 A1
     true-P  arms: harmonics at  f, 2f, 3f, 4f
     true-2P arms: harmonics at  f/2, f, 3f/2, 2f
-    noise = the campaign's own measured residual scatter
-    arms B, C, D add apparition drift (amplitude modulation + phase drift)
+    arms B, C, D, G add apparition drift (amplitude modulation + phase drift)
+    noise = the campaign's own measured residual scatter, drawn ONCE per
+            campaign and realisation and shared by all seven arms (paired design)
 
-Screens evaluated on the same simulated lightcurve (paired):
+Screens evaluated on the same simulated lightcurve:
     S1 unabsorbed : H0={f,2f} (4)          vs H1=+{f/2,3f/2} (8)      dof=4
     S2 absorbed   : H0'={f,2f}+gamma12 (8) vs H1'=+{f/2,3f/2} (12)   dof=4
-    controls for both: quartic {u..u^4} (4 extra), gamma12 (4 extra)
-    accept = F_in > F_crit(4,dof)  and  held-out gain > 0  and  beats both
+    fourth condition: the same test must also beat C34 = {f,2f,3f,4f}
 
-Sample: 200 cadences, one per asteroid, from the K>=5 physical selection.
-Usage: python calib_v5_20261121.py [ncamp] [nrep] [A1] [suffix]
+Output: acc1_/rep1_ (three conditions), acc4_ (four conditions) per arm,
+saved to calib_v8l<SUF>.npz. This single pass produces every number in Table 7,
+so no cell of the table depends on a second random stream.
+
+Usage:  python reproduce_table7.py [ncamp] [nrep] [A1] [suffix]
+Environment:
+    AC_ROOT      checkout holding out_full_lcdb_20261119.csv (default: this folder)
+    ALCDEF_ROOT  unpacked ALCDEF files                   (default: $AC_ROOT/alcdef_data)
+    AC_MAX_CAD   optional, keep only the first N cadences (smoke test)
 """
+import os
 import csv, os, sys, time
 import numpy as np
 from scipy.stats import f as fdist
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
-ROOT = r"C:\Users\jacky\.openclaw\workspace\alcdef_data"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.environ.get("ALCDEF_ROOT", os.path.join(H, "alcdef_data"))
 NCAMP = int(sys.argv[1]) if len(sys.argv) > 1 else 200
+if os.environ.get("AC_MAX_CAD"):
+    NCAMP = min(NCAMP, int(os.environ["AC_MAX_CAD"]))
 NREP = int(sys.argv[2]) if len(sys.argv) > 2 else 8
 A1MAG = float(sys.argv[3]) if len(sys.argv) > 3 else 0.05
 SUF = sys.argv[4] if len(sys.argv) > 4 else "_a05"
-NPZ = os.path.join(H, "calib_v5b%s.npz" % SUF)
+NPZ = os.path.join(H, "calib_v8l%s.npz" % SUF)
 SD_AMP, SD_PH = 0.15, 0.25
 
 
@@ -163,7 +172,7 @@ for i in order:
                     num=int(r["num"]), file=r["file"]))
 print("cadences:", len(cad), " A1 = %.2f mag, reps %d" % (A1MAG, NREP), flush=True)
 
-ARMS = ("A", "B", "C", "D", "E", "F")
+ARMS = ("A", "B", "C", "D", "E", "F", "G")
 acc1 = {a: np.zeros(len(cad)) for a in ARMS}
 rep1 = {a: np.zeros(len(cad)) for a in ARMS}
 acc2 = {a: np.zeros(len(cad)) for a in ARMS}
@@ -185,8 +194,8 @@ for i, c in enumerate(cad):
         noise = rng.normal(0, sig, t.size)
         for arm in ARMS:
             twoP = arm in ("A", "D")
-            drift = arm in ("B", "C", "D")
-            shape = SHAPE_PURE if arm == "F" else SHAPE
+            drift = arm in ("B", "C", "D", "G")
+            shape = SHAPE_PURE if arm in ("F", "G") else SHAPE
             ftrue = fcat / 2.0 if twoP else fcat
             y = np.zeros_like(t)
             for m in range(4):
@@ -195,7 +204,6 @@ for i, c in enumerate(cad):
                 cm = cm_ if drift else 0.0
                 y += shape[m] * (1 + gm * u) * np.cos(2 * np.pi * (m + 1) * ftrue * t + ph + cm * u)
             y += noise
-            y += rng.normal(0, sig, t.size)
             for tag, kinds, ac, rp in (("S1", ("H0", "H1"), acc1, rep1),
                                        ("S2", ("H0p", "H1p"), acc2, rep2)):
                 out = screen(t, y, g, fcat, kinds, u)
@@ -227,7 +235,7 @@ np.savez(NPZ,
 lab = dict(A="A true 2P, stationary      ", B="B true P, amplitude modul. ",
            C="C true P, four-harmonic drift", D="D true 2P + drift         ",
            E="E true P, stationary (null) ",
-           F="F strict H0, A3=A4=0     ")
+           F="F strict H0, A3=A4=0     ", G="G strict H0 + drift       ")
 print("\nA1 = %.2f mag   (exact F_crit(4, dof) per campaign)" % A1MAG)
 for tag, ac, rp in (("unabsorbed 4->8 ", acc1, rep1), ("absorbed 8->12  ", acc2, rep2),
                     ("unabs + beats 3f4f", ac4, rep1)):

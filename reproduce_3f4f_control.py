@@ -18,11 +18,12 @@ minimum-norm pseudo-solution silently.
 
 Output: out_lono_v5.csv  (file, app, K, npt, F_in, d_half, d_quad, d_gam, folds_skipped)
 """
+import os
 import csv, os, glob, time
 import numpy as np
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
-ROOT = r"C:\Users\jacky\.openclaw\workspace\alcdef_data"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.environ.get("ALCDEF_ROOT", os.path.join(H, "alcdef_data"))
 OUT = os.path.join(H, "out_lono_v5_c34.csv")
 KMIN = 5
 MIN_DOF = 5

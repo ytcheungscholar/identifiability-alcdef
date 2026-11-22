@@ -23,8 +23,8 @@ import time
 
 import numpy as np
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
-ROOT = r"C:\Users\jacky\.openclaw\workspace\alcdef_data"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.environ.get("ALCDEF_ROOT", os.path.join(H, "alcdef_data"))
 KMIN, MIN_DOF, COND_MAX = 5, 5, 1e6
 MODE = sys.argv[1] if len(sys.argv) > 1 else "freqopt"
 if MODE == "freqopt":

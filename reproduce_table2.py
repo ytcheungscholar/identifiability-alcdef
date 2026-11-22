@@ -15,7 +15,7 @@ import time
 
 import numpy as np
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(H, "out_table2_n200.csv")
 SIGMA_ZP = 0.25
 A1, A2, A3 = 0.10, 0.25, 0.03

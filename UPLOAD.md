@@ -1,62 +1,90 @@
-# How to get this to GitHub (3 steps, ~3 minutes)
+# Publishing v1.2.0
 
-This folder is the release-ready v1.1.0 tree for
-`github.com/ytcheungscholar/identifiability-alcdef`.
+This folder is the release-ready **v1.2.0** tree (22 November 2026) for
+`github.com/ytcheungscholar/identifiability-alcdef`. It is **flat**: every file
+sits at the top level, exactly like the current GitHub repository.
 
-## 1. Upload
+## What changed in v1.2.0
 
-**Easiest (no git needed):** open the repo on github.com → *Add file → Upload files*
-→ drag the **contents** of this folder in (not the folder itself) → commit straight
-to the default branch.
-GitHub's web uploader takes up to 100 files / 25 MB per file, which this tree fits
-(≈7.5 MB total, largest file 1.9 MB).
+- `reproduce_table7.py` now generates all **seven** calibration arms in one pass,
+  with **one shared noise draw** per campaign/realisation. The v1.1.1 defect
+  (noise added twice) is fixed.
+- Table 7 / Fig. 3b were rerun: power 29.1/45.1 % (three conditions),
+  28.7/44.3 % (four); nulls 1.0–2.2 %.
+- New `calib_v8l_a05.npz`, `calib_v8l_a10.npz`.
+- `reproduce_table7_seventh_arm.py` retired; kept as
+  `legacy_v111_reproduce_table7_seventh_arm.py`.
+- Old calibration snapshots renamed `legacy_v111_calib_v5b_*.npz` and
+  `legacy_v111_calib_v8k_*.npz`. **Do not mix them with v1.2.0 numbers.**
+- `out_zp_baseline_20261121.csv` added (read by `fig2.py` and
+  `reproduce_table8.py`; it was missing from v1.1.1).
+- `requirements.txt` now lists `pandas` (plus numpy, scipy, matplotlib).
+- `CITATION.cff` is 1.2.0 / 2026-11-22.
+- `README.md` and `CHANGELOG.md` updated.
 
-**Or with GitHub Desktop:** *File → Add local repository* → point at this folder →
-*Commit to main* → *Publish/Push*.
+## 1. Upload (no git needed)
 
-**With git CLI (if you ever install it):**
+Open <https://github.com/ytcheungscholar/identifiability-alcdef>, choose
+**Add file → Upload files**, and drag the **contents** of this folder (not the
+folder itself) into the page. Commit to `main`.
+
+Then delete the five files that v1.2.0 supersedes, which the web uploader does
+not remove automatically:
+
+- `calib_v5b_a05.npz`
+- `calib_v5b_a10.npz`
+- `calib_v8k_a05.npz`
+- `calib_v8k_a10.npz`
+- `reproduce_table7_seventh_arm.py`
+
+Their replacements are the `legacy_v111_*` files and `calib_v8l_*`.
+
+## 2. Or with the portable git (OpenClaw)
+
+This machine already has a portable git at:
+
+```
+C:\Users\jacky\AppData\Local\OpenClaw\deps\portable-git\mingw64\bin\git.exe
+```
+
+From a normal terminal (so that the credential prompt can appear):
+
 ```
 cd <this folder>
 git init -b main
 git remote add origin https://github.com/ytcheungscholar/identifiability-alcdef.git
 git add -A
-git commit -m "v1.1.0: four-condition screen, higher-harmonic control, block audit"
-git push -u origin main --force
+git commit -m "v1.2.0: fix calibration noise defect; seven-arm Table 7 in one pass"
+git push -u origin main
 ```
 
-## 2. Cut the release that Zenodo watches
+If the push asks for credentials, use a **fine-grained personal access token**
+with `Contents: Read and write` on this repository as the password (GitHub no
+longer accepts the account password). Do not paste the token into a chat.
 
-GitHub → *Releases → Draft a new release*:
+## 3. Cut the release
 
-- Tag: **v1.1.0** (create the tag on publish)
-- Title: `v1.1.0 — four-condition screen and ALCDEF block audit`
-- Notes: paste the top section of `README.md` (headline numbers table)
+GitHub → **Releases → Draft a new release**:
+
+- Tag: **v1.2.0** (create the tag on publish)
+- Title: `v1.2.0 — calibration noise fix and seven-arm Table 7`
+- Notes: paste the top of `README.md` and the `CHANGELOG.md` v1.2.0 section.
 - Publish.
 
-If the Zenodo ↔ GitHub integration is enabled for this repo, publishing the
-release mints the DOI immediately and shows it on the release page.
+The concept DOI is `10.5281/zenodo.24422013` and always resolves to the latest
+archived version; v1.1.1 is `10.5281/zenodo.24422014`. If Zenodo is connected to
+the repository, publishing the release mints a new version DOI for v1.2.0; the
+paper cites only the concept DOI, so no manuscript change is needed.
 
-## 3. Send me the DOI
-
-Give me the number (e.g. `10.5281/zenodo.12345678`) and I will:
-
-- replace `10.5281/zenodo.XXXXXXX` in `main_v7.tex` (Data availability) **and** in
-  `cover_letter_v8.tex`,
-- recompile and verify `0 error / 0 undefined / no ??`,
-- hand back the final PDF for submission.
-
-## What is in here
+## File map
 
 ```
-README.md            v1.1.0, headline numbers, artefact -> script -> data map
-CITATION.cff         1.1.0, 2026-11-21
-code/                13 scripts (paper's Data availability names match exactly)
-data/v1.1/           13 derived tables behind every number in the paper
-figs/                Figures 1-4 as shipped
-data/*.csv (root)    v1.0 tables, kept for provenance only -- superseded
+README.md, CHANGELOG.md, CITATION.cff, LICENSE, requirements.txt
+reproduce_*.py, analyse_closure.py, fig2.py, fig3.py, fig4.py
+out_*.csv, calib_v8l_*.npz, legacy_v111_*.npz
+fig*.png
 ```
 
-Legacy files at the root (`reproduce_figures.py`, `fill_placeholders.py`,
-`_prior_bins*.py`, `_table7_recheck.py`) belong to the v1.0 layout. Delete them
-after the upload if you want a clean tree; nothing in `code/` or `data/v1.1/`
-depends on them.
+`fill_placeholders.py`, `lightcurve_identifiability.py`, `reproduce_figures.py`,
+`_prior_bins*.py`, `_table7_recheck.py`, `test_smoke.py` are v1.0/v1.1 provenance
+files; they are kept for the record and are not needed by the v1.2.0 pipeline.

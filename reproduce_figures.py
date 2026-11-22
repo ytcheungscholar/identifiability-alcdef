@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Reproduce Figs. 1-4 of the paper from the shipped derived tables.
 

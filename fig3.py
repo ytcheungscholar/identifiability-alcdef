@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""v9 Fig. 3 -- panel (a) now carries the fourth extension.
+"""v10 Fig. 3 -- panel (b) redrawn from the single-noise seven-arm run (calib_v8l).
 
 (a) four extensions of the same 4 -> 8 model on the same campaigns: in-sample
     flag rate (exact per-campaign F_crit) against held-out improvement.
@@ -8,6 +8,7 @@
 (b) calibration at the two reference amplitudes under the three conditions,
     with the archive rate marked (unchanged).
 """
+import os
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -15,8 +16,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.stats import f as fdist
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
-OUT = r"C:\Users\jacky\.openclaw\workspace\v2_manuscript\figures\fig3_lono.png"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(H, "fig3_lono.png")
 
 plt.rcParams.update({"font.size": 8, "axes.labelsize": 8.5, "axes.titlesize": 8.5,
                      "xtick.labelsize": 7.4, "ytick.labelsize": 7.2,
@@ -49,16 +50,16 @@ for i in range(n):
     ax[0].text(xx[i] + w / 2, held[i] + 1.4, "%.1f" % held[i], ha="center", fontsize=6.8)
 ax[0].set_xticks(xx); ax[0].set_xticklabels(names)
 ax[0].set_ylabel("per cent of campaigns")
-ax[0].set_ylim(0, 115)
+ax[0].set_ylim(0, 100)
 ax[0].grid(alpha=0.22, axis="y")
 ax[0].legend(loc="upper left", framealpha=0.9)
 ax[0].set_title("(a) same 4$\\to$8 model, %s campaigns" % format(len(m), ","))
 
-arms = ["A", "E", "F", "B", "C", "D"]
-labels = ["$2P$\nstat.", "$P$\nstat.", "strict\n$H_0$", "$P$\namp-mod", "$P$\ndrift", "$2P$\n+drift"]
+arms = ["A", "E", "F", "B", "C", "D", "G"]
+labels = ["$2P$\nstat.", "$P$\nstat.", "strict\n$H_0$", "$P$\namp-mod", "$P$\ndrift", "$2P$\n+drift", "strict\n$H_0$+drift"]
 res = {}
 for suf, a1v in (("_a05", 0.05), ("_a10", 0.10)):
-    d = np.load(H + r"\calib_v5%s.npz" % suf, allow_pickle=True)
+    d = np.load(H + r"\calib_v8l%s.npz" % suf, allow_pickle=True)
     r1 = [100 * d["acc1_" + a].sum() / d["rep1_" + a].sum() for a in arms]
     res[a1v] = r1
     print("A1=%.2f" % a1v, np.round(r1, 1))
@@ -70,13 +71,13 @@ for i in range(len(arms)):
     ax[1].text(x2[i] - w2 / 2, res[0.05][i] + 0.9, "%.1f" % res[0.05][i], ha="center", fontsize=6.4)
     ax[1].text(x2[i] + w2 / 2, res[0.10][i] + 0.9, "%.1f" % res[0.10][i], ha="center", fontsize=6.4)
 ax[1].axhline(4.99, color="#C44E52", ls="--", lw=0.9)
-ax[1].set_xlim(-0.62, 5.45)
+ax[1].set_xlim(-0.68, 6.48)
 ax[1].set_xticks(x2); ax[1].set_xticklabels(labels)
 ax[1].set_ylabel("accepted [%]")
 ax[1].set_ylim(0, 78)
 ax[1].grid(alpha=0.22, axis="y")
 ax[1].legend(loc="upper center", framealpha=0.9, ncol=2, bbox_to_anchor=(0.5, 0.96))
-ax[1].set_title(r"(b) calibration, six arms")
+ax[1].set_title(r"(b) calibration, seven arms")
 
 fig.tight_layout()
 fig.savefig(OUT, dpi=220)

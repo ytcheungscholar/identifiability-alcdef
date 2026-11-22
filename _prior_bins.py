@@ -1,4 +1,4 @@
-﻿import csv, numpy as np
+import csv, numpy as np
 rows=[r for r in csv.DictReader(open("data/alcdef_identifiability_catalog.csv",encoding="utf-8"))]
 def f(r,k):
     try: return float(r[k])

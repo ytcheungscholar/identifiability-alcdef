@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """v8 Figure 4, six bins -- identical to the bins of Table 8, with the 0/0
 regime of the lowest bin shaded so it is not read as a recovery measurement."""
+import os
 import numpy as np
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
-OUT = r"C:\Users\jacky\.openclaw\workspace\v2_manuscript\figures\fig4.png"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(H, "fig4.png")
 
 d = pd.read_csv(H + r"\out_table8_full_20261121.csv")
 BINS = [(0, .05), (.05, .15), (.15, .30), (.30, .50), (.50, 1.0), (1.0, 1e9)]

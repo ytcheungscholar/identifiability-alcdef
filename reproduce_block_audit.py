@@ -24,8 +24,8 @@ import time
 import numpy as np
 from scipy.stats import f as fdist
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
-ROOT = r"C:\Users\jacky\.openclaw\workspace\alcdef_data"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.environ.get("ALCDEF_ROOT", os.path.join(H, "alcdef_data"))
 OUT = os.path.join(H, "out_block_audit_20261121.csv")
 KEYS = os.path.join(H, "out_lono_v5_c34.csv")
 

@@ -18,8 +18,8 @@ import time
 import numpy as np
 import pandas as pd
 
-H = r"C:\Users\jacky\.openclaw\workspace\ac_repo_plan"
-ROOT = r"C:\Users\jacky\.openclaw\workspace\alcdef_data"
+H = os.environ.get("AC_ROOT", os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.environ.get("ALCDEF_ROOT", os.path.join(H, "alcdef_data"))
 OUT = os.path.join(H, "out_table8_full_20261121.csv")
 SZP = [None, 0.020, 0.001, 0.0]
 BINS = [(0, .15), (.15, .30), (.30, .50), (.50, 1.0), (1.0, 1e9)]
